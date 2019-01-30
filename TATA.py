@@ -41,7 +41,7 @@ for loc1 in find_all(i.seq, 'ATG'):
                     prekidac = False
                     break
             if prekidac and (len(sekvenca) > duzina_okvira):
-                outputi.append('\t'.join(str(deo) for deo in [loc2,loc2+len(sekvenca), len(sekvenca), i.seq[loc2:loc2+8], '... '+loc1 - loc2-8+' ...',sekvenca, sekvenca.translate()]))
+                outputi.append('\t'.join(str(deo) for deo in [loc2,loc2+len(sekvenca), len(sekvenca), i.seq[loc2:loc2+8], '... '+str(loc1 - loc2-8)+' ...',sekvenca, sekvenca.translate()]))
 
 message="<html><head><h3>Outputi</h3></head><body>"+''.join(["<p>"+out+"</p>" for out in outputi])+"</body></html>"
 
