@@ -1,6 +1,4 @@
 from Bio import SeqIO
-import webbrowser
-from os import getcwd
 
 
 def find_all(iterable, strings):
@@ -50,5 +48,3 @@ message="<html><head><h3>Outputi</h3></head><body>"+''.join(["<p>"+out+"</p>" fo
 with open('prikaz.html','w') as prikaz:
     prikaz.write(message)
 
-filename=getcwd()+'prikaz.html'
-webbrowser.open_new_tab(filename)
