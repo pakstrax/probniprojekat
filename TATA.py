@@ -21,7 +21,7 @@ def find_all(iterable, strings):
 # inputi
 duzina_okvira=30
 lokacija_TATA=25
-i = SeqIO.read("opt/example_human_reference.fasta", "fasta")
+i = SeqIO.read("example_human_reference.fasta", "fasta")
 
 
 outputi=[]
