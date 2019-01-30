@@ -23,7 +23,7 @@ def find_all(iterable, strings):
 # inputi
 duzina_okvira=30
 lokacija_TATA=25
-i = SeqIO.read("/Users/pavlemarinkovic/Downloads/example_human_reference.fasta", "fasta")
+i = SeqIO.read("https://sb-public-us-east-1.s3.amazonaws.com/example_human_reference.fasta?x-username=pavle.marinkovic&x-requestId=d797d00e-1494-46ba-9da0-5ede5e0b4c26&x-project=admin%2Fsbg-public-data&response-content-disposition=attachment%3Bfilename%3Dexample_human_reference.fasta&response-content-type=application%2Foctet-stream&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20190130T105212Z&X-Amz-SignedHeaders=host&X-Amz-Expires=172800&X-Amz-Credential=AKIAJH6BPOGIWTDUABEQ%2F20190130%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=4961cc5ef84e3184c4cbcfac19368ec51732c42526889fe91d035fea1a7bbdc8", "fasta")
 
 
 outputi=[]
