@@ -21,10 +21,10 @@ def parse_arguments():
                         required=True)
     parser.add_argument('-t', '--tata',
                         type=int,
-                        help='TATA Distance from START')
+                        help='TATA Distance from START (assumes 25). By default TATA search looks for distances of +/- 10% of the given value')
     parser.add_argument('-o', '--orf',
                         type=int,
-                        help='Minimum ORF length in bp')
+                        help='Minimum ORF length in bp (assumes 0)')
 
     args = vars(parser.parse_args())
 
@@ -70,7 +70,7 @@ def main(duzina_okvira=0, lokacija_TATA=30):
     # output prep
     outputi = []
 
-    html_name=file+'.html'
+    html_name = file + '.html'
 
     # script
     i = SeqIO.read(file, "fasta")
