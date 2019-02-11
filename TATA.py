@@ -120,7 +120,7 @@ def main():
         <th>DNA sequence</th>
         <th>AA sequence</th>
       </tr>""".format(file=file,bracket1='{',bracket2='}') + ''.join(
-        ["<tr><td>" + out + "</td></tr>" for out in outputi]) + "</body></html>"
+        ["<tr><td>" + out + "</td></tr>" for out in outputi]) + "</table></body></html>"
 
     with open(html_name, 'w') as prikaz:
         prikaz.write(message)
