@@ -15,6 +15,7 @@ def parse_arguments():
     :return: Filepath to the input FASTA file
     """
     parser = argparse.ArgumentParser(description=__desc__)
+    parser.set_defaults(tata=25, orf=0)
     parser.add_argument('-f', '--fasta',
                         type=str,
                         help='FASTA file (.fasta is optional)',
@@ -25,7 +26,6 @@ def parse_arguments():
     parser.add_argument('-o', '--orf',
                         type=int,
                         help='Minimum ORF length in bp (assumes 0)')
-
     args = vars(parser.parse_args())
 
     return args['fasta'], args['tata'], args['orf']
@@ -54,14 +54,12 @@ def find_all(iterable, strings):
     return lokacije
 
 
-def main(duzina_okvira=0, lokacija_TATA=30):
+def main():
     # inputs
     file, tata, orf = parse_arguments()
 
-    if orf:
-        duzina_okvira = orf
-    if tata:
-        lokacija_TATA = tata
+    duzina_okvira = orf
+    lokacija_TATA = tata
 
     # input prep
     if '.fasta' not in file:
@@ -89,12 +87,40 @@ def main(duzina_okvira=0, lokacija_TATA=30):
                         prekidac = False
                         break
                 if prekidac and (len(sekvenca) > duzina_okvira):
-                    outputi.append('\t'.join(str(deo) for deo in
-                                             [loc2, loc2 + len(sekvenca), len(sekvenca), i.seq[loc2:loc2 + 8],
-                                              '... ' + str(loc1 - loc2 - 8) + ' ...', sekvenca, sekvenca.translate()]))
+                    outputi.append('</td><td>'.join(str(deo) for deo in
+                                             [loc2, loc2 + len(sekvenca), len(sekvenca), i.seq[loc2:loc2 + 8]+
+                                              '... ' + str(loc1 - loc2 - 8) + ' ...'+ sekvenca,sekvenca.translate()]))
 
-    message = "<html><head><h3>Outputi za {}</h3></head><body>".format(file) + ''.join(
-        ["<p>" + out + "</p>" for out in outputi]) + "</body></html>"
+    message = """
+    <html>
+    <head>
+    <h3>Outputi za {file}</h3>
+    <style>
+        table {bracket1}
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        {bracket2}
+    td, th {bracket1}
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    {bracket2}
+    tr:nth-child(even) {bracket1}
+        background-color: #dddddd;
+    {bracket2}
+    </style>
+    </head>
+    <body>
+    <table>
+      <tr>
+        <th>From</th>
+        <th>To</th>
+        <th>Length</th>
+        <th>DNA sequence</th>
+        <th>AA sequence</th>
+      </tr>""".format(file=file,bracket1='{',bracket2='}') + ''.join(
+        ["<tr><td>" + out + "</td></tr>" for out in outputi]) + "</body></html>"
 
     with open(html_name, 'w') as prikaz:
         prikaz.write(message)
