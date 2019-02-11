@@ -15,7 +15,9 @@ def parse_arguments():
     :return: Filepath to the input FASTA file
     """
     parser = argparse.ArgumentParser(description=__desc__)
+    
     parser.set_defaults(tata=25, orf=0)
+    
     parser.add_argument('-f', '--fasta',
                         type=str,
                         help='FASTA file (.fasta is optional)',
@@ -67,7 +69,6 @@ def main():
 
     # output prep
     outputi = []
-
     html_name = file + '.html'
 
     # script
@@ -91,6 +92,7 @@ def main():
                                              [loc2, loc2 + len(sekvenca), len(sekvenca), i.seq[loc2:loc2 + 8]+
                                               '... ' + str(loc1 - loc2 - 8) + ' ...'+ sekvenca,sekvenca.translate()]))
 
+    # output
     message = """
     <html>
     <head>
