@@ -70,6 +70,8 @@ def main(duzina_okvira=0, lokacija_TATA=30):
     # output prep
     outputi = []
 
+    html_name=file+'.html'
+
     # script
     i = SeqIO.read(file, "fasta")
     for loc1 in find_all(i.seq, 'ATG'):
@@ -91,10 +93,10 @@ def main(duzina_okvira=0, lokacija_TATA=30):
                                              [loc2, loc2 + len(sekvenca), len(sekvenca), i.seq[loc2:loc2 + 8],
                                               '... ' + str(loc1 - loc2 - 8) + ' ...', sekvenca, sekvenca.translate()]))
 
-    message = "<html><head><h3>Outputi</h3></head><body>" + ''.join(
+    message = "<html><head><h3>Outputi za {}</h3></head><body>".format(file) + ''.join(
         ["<p>" + out + "</p>" for out in outputi]) + "</body></html>"
 
-    with open('prikaz.html', 'w') as prikaz:
+    with open(html_name, 'w') as prikaz:
         prikaz.write(message)
 
 
