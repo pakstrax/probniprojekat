@@ -1,4 +1,4 @@
-import argparse
+import argparse, glob
 from Bio import SeqIO
 
 __desc__ = """TATA search looks for the TATA sequence in a FASTA file
@@ -15,22 +15,24 @@ def parse_arguments():
     :return: Filepath to the input FASTA file
     """
     parser = argparse.ArgumentParser(description=__desc__)
-    
-    parser.set_defaults(tata=25, orf=0)
-    
+
+    parser.set_defaults(tata=25, orf=0, allfasta=False)
+
     parser.add_argument('-f', '--fasta',
                         type=str,
-                        help='FASTA file (.fasta is optional)',
-                        required=True)
+                        help='FASTA file (.fasta is optional)')
     parser.add_argument('-t', '--tata',
                         type=int,
-                        help='TATA Distance from START (assumes 25). By default TATA search looks for distances of +/- 10% of the given value')
+                        help='TATA Distance from START (default 25). By default TATA search looks for distances of +/- 10% of the given value')
     parser.add_argument('-o', '--orf',
                         type=int,
-                        help='Minimum ORF length in bp (assumes 0)')
+                        help='Minimum ORF length in bp (default 0)')
+    parser.add_argument('-a','--allfasta',
+                        action='store_true',
+                        help='Find and read all FASTA files (default False)')
     args = vars(parser.parse_args())
 
-    return args['fasta'], args['tata'], args['orf']
+    return args['fasta'], args['tata'], args['orf'],args['allfasta']
 
 
 def find_all(iterable, strings):
@@ -58,74 +60,83 @@ def find_all(iterable, strings):
 
 def main():
     # inputs
-    file, tata, orf = parse_arguments()
+    files, tata, orf, allfasta = parse_arguments()
+
+    if allfasta:
+        files=[]
+        for file in glob.glob('*.fasta'):
+            files.append(file)
+    else:
+        files=files.split(' ')
 
     duzina_okvira = orf
     lokacija_TATA = tata
 
     # input prep
-    if '.fasta' not in file:
-        file += '.fasta'
+    for i,f in enumerate(files):
+        if '.fasta' not in f:
+            files[i] = f+'.fasta'
 
     # output prep
     outputi = []
-    html_name = file + '.html'
 
     # script
-    i = SeqIO.read(file, "fasta")
-    for loc1 in find_all(i.seq, 'ATG'):
-        for loc2 in find_all(i.seq, 'TATA'):
-            if loc1 - lokacija_TATA * 1.1 < loc2 < loc1 - lokacija_TATA * 0.9:
-                prekidac = True
-                start = loc1
-                sekvenca = ""
-                triplet = ""
-                while triplet not in ['TAG', 'TAA', 'TGA']:
-                    triplet = i.seq[start:start + 3]
-                    sekvenca += triplet
-                    start += 3
-                    if start > len(i.seq):
-                        prekidac = False
-                        break
-                if prekidac and (len(sekvenca) > duzina_okvira):
-                    outputi.append('</td><td>'.join(str(deo) for deo in
-                                             [loc2, loc2 + len(sekvenca), len(sekvenca), i.seq[loc2:loc2 + 8]+
-                                              '... ' + str(loc1 - loc2 - 8) + ' ...'+ sekvenca,sekvenca.translate()]))
+    for file in files:
+        html_name=file+'.html'
+        i = SeqIO.read(file, "fasta")
+        for loc1 in find_all(i.seq, 'ATG'):
+            for loc2 in find_all(i.seq, 'TATA'):
+                if loc1 - lokacija_TATA * 1.1 < loc2 < loc1 - lokacija_TATA * 0.9:
+                    prekidac = True
+                    start = loc1
+                    sekvenca = ""
+                    triplet = ""
+                    while triplet not in ['TAG', 'TAA', 'TGA']:
+                        triplet = i.seq[start:start + 3]
+                        sekvenca += triplet
+                        start += 3
+                        if start > len(i.seq):
+                            prekidac = False
+                            break
+                    if prekidac and (len(sekvenca) > duzina_okvira):
+                        outputi.append('</td><td>'.join(str(deo) for deo in
+                                                 [loc2, loc2 + len(sekvenca), len(sekvenca), i.seq[loc2:loc2 + 8]+
+                                                  '... ' + str(loc1 - loc2 - 8) + ' ...'+ sekvenca,sekvenca.translate()]))
 
-    # output
-    message = """
-    <html>
-    <head>
-    <h3>Outputi za {file}</h3>
-    <style>
-        table {bracket1}
-        font-family: arial, sans-serif;
-        border-collapse: collapse;
-        width: 100%;
+        # output
+        message = """
+        <html>
+        <head>
+        <h3>Outputi za {file}</h3>
+        <style>
+            table {bracket1}
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+            {bracket2}
+        td, th {bracket1}
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
         {bracket2}
-    td, th {bracket1}
-        border: 1px solid #dddddd;
-        text-align: left;
-        padding: 8px;
-    {bracket2}
-    tr:nth-child(even) {bracket1}
-        background-color: #dddddd;
-    {bracket2}
-    </style>
-    </head>
-    <body>
-    <table>
-      <tr>
-        <th>From</th>
-        <th>To</th>
-        <th>Length</th>
-        <th>DNA sequence</th>
-        <th>AA sequence</th>
-      </tr>""".format(file=file,bracket1='{',bracket2='}') + ''.join(
-        ["<tr><td>" + out + "</td></tr>" for out in outputi]) + "</table></body></html>"
+        tr:nth-child(even) {bracket1}
+            background-color: #dddddd;
+        {bracket2}
+        </style>
+        </head>
+        <body>
+        <table>
+          <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>Length</th>
+            <th>DNA sequence</th>
+            <th>AA sequence</th>
+          </tr>""".format(file=file,bracket1='{',bracket2='}') + ''.join(
+            ["<tr><td>" + out + "</td></tr>" for out in outputi]) + "</table></body></html>"
 
-    with open(html_name, 'w') as prikaz:
-        prikaz.write(message)
+        with open(html_name, 'w') as prikaz:
+            prikaz.write(message)
 
 
 if __name__ == '__main__':
