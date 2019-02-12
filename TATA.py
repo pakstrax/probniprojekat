@@ -1,4 +1,4 @@
-import argparse, glob
+import argparse, glob, os
 from Bio import SeqIO
 
 __desc__ = """TATA search looks for the TATA sequence in a FASTA file
@@ -9,6 +9,12 @@ __desc__ = """TATA search looks for the TATA sequence in a FASTA file
               lengths and the protein sequence of the ORF as a report."""
 
 
+def DNA_rev_comp(sekvenca):
+    for letter,repl in zip('ATGC10','1A0GTC'):
+        sekvenca=sekvenca.replace(letter,repl)
+    return sekvenca[::-1]
+
+
 def parse_arguments():
     """
     Parse command-line arguments using argparse module.
@@ -16,19 +22,21 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser(description=__desc__)
 
-    parser.set_defaults(tata=25, orf=0, allfasta=False)
-
-    parser.add_argument('-f', '--fasta',
+    parser.add_argument('fasta',
                         type=str,
+                        default='',
                         help='FASTA file (.fasta is optional)')
     parser.add_argument('-t', '--tata',
                         type=int,
+                        default=25,
                         help='TATA Distance from START (default 25). By default TATA search looks for distances of +/- 10% of the given value')
     parser.add_argument('-o', '--orf',
                         type=int,
+                        default=0,
                         help='Minimum ORF length in bp (default 0)')
     parser.add_argument('-a','--allfasta',
                         action='store_true',
+                        default=False,
                         help='Find and read all FASTA files (default False)')
     args = vars(parser.parse_args())
 
@@ -62,12 +70,13 @@ def main():
     # inputs
     files, tata, orf, allfasta = parse_arguments()
 
-    if allfasta:
+    if not files or allfasta:
         files=[]
+        # os.chdir(os.getcwd())
         for file in glob.glob('*.fasta'):
             files.append(file)
     else:
-        files=files.split(' ')
+        files=files.split(',')
 
     duzina_okvira = orf
     lokacija_TATA = tata
@@ -109,19 +118,19 @@ def main():
         <head>
         <h3>Outputi za {file}</h3>
         <style>
-            table {bracket1}
+            table {{
             font-family: arial, sans-serif;
             border-collapse: collapse;
             width: 100%;
-            {bracket2}
-        td, th {bracket1}
+        }}
+        td, th {{
             border: 1px solid #dddddd;
             text-align: left;
             padding: 8px;
-        {bracket2}
-        tr:nth-child(even) {bracket1}
+        }}
+        tr:nth-child(even) {{
             background-color: #dddddd;
-        {bracket2}
+        }}
         </style>
         </head>
         <body>
@@ -132,7 +141,7 @@ def main():
             <th>Length</th>
             <th>DNA sequence</th>
             <th>AA sequence</th>
-          </tr>""".format(file=file,bracket1='{',bracket2='}') + ''.join(
+          </tr>""".format(file=file) + ''.join(
             ["<tr><td>" + out + "</td></tr>" for out in outputi]) + "</table></body></html>"
 
         with open(html_name, 'w') as prikaz:
